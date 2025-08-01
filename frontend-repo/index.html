@@ -1,48 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Ask Something</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>HF FastAPI Frontend</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 30px;
-    }
-    input, button {
-      padding: 10px;
-      font-size: 16px;
-      margin-right: 10px;
-    }
-    #response {
-      margin-top: 20px;
-      font-weight: bold;
-    }
+    body { font-family: sans-serif; padding: 2rem; }
+    input, button { padding: 0.5rem; font-size: 1rem; }
+    #response { margin-top: 1rem; font-weight: bold; color: #2c3e50; }
+    .error { color: #e74c3c; }
   </style>
 </head>
 <body>
-  <h1>Ask Your Question</h1>
-  <input type="text" id="question" placeholder="Type your question here..." />
-  <button onclick="getPrediction()">Ask</button>
+  <h1>Ask the HF FastAPI</h1>
 
+  <!-- Input for /predict -->
+  <div>
+    <input id="query" type="text" placeholder="Type your question…" />
+    <button onclick="callPredict()">Submit</button>
+  </div>
+
+  <!-- Button for /ping -->
+  <div style="margin-top:1rem;">
+    <button onclick="callPing()">Ping the API</button>
+  </div>
+
+  <!-- Output area -->
   <div id="response"></div>
 
   <script>
-    async function getPrediction() {
-      const question = document.getElementById("question").value;
-      if (!question.trim()) {
-        document.getElementById("response").innerText = "Please enter a question.";
+    const BASE_URL = 'https://mohamedfahim-testing.hf.space';
+
+    async function callPredict() {
+      const q = encodeURIComponent(document.getElementById('query').value.trim());
+      const out = document.getElementById('response');
+      out.className = '';
+      if (!q) {
+        out.textContent = 'Please enter a question.';
         return;
       }
-
-      const url = `https://mohamedfahim-testing.hf.space/predict?q=${encodeURIComponent(question)}`;
-
       try {
-        const res = await fetch(url);
-        if (!res.ok) throw new Error("Network response was not ok.");
+        const res = await fetch(`${BASE_URL}/predict?q=${q}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
-        document.getElementById("response").innerText = data.response;
-      } catch (error) {
-        document.getElementById("response").innerText = "Error: " + error.message;
+        out.textContent = data.response;
+      } catch (err) {
+        out.textContent = 'Error: ' + err.message;
+        out.className = 'error';
+      }
+    }
+
+    async function callPing() {
+      const out = document.getElementById('response');
+      out.className = '';
+      try {
+        const res = await fetch(`${BASE_URL}/ping`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        out.textContent = 'Ping response: ' + JSON.stringify(data);
+      } catch (err) {
+        out.textContent = 'Error: ' + err.message;
+        out.className = 'error';
       }
     }
   </script>
