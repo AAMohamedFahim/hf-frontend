@@ -1,15 +1,50 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>My HF Space Frontend</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <title>Ask Something</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 30px;
+    }
+    input, button {
+      padding: 10px;
+      font-size: 16px;
+      margin-right: 10px;
+    }
+    #response {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
-  <h1>Test FastAPI Endpoint</h1>
-  <input id="input" placeholder="Type something" />
-  <button onclick="sendRequest()">Send</button>
-  <pre id="response"></pre>
+  <h1>Ask Your Question</h1>
+  <input type="text" id="question" placeholder="Type your question here..." />
+  <button onclick="getPrediction()">Ask</button>
 
-  <script src="script.js"></script>
+  <div id="response"></div>
+
+  <script>
+    async function getPrediction() {
+      const question = document.getElementById("question").value;
+      if (!question.trim()) {
+        document.getElementById("response").innerText = "Please enter a question.";
+        return;
+      }
+
+      const url = `https://mohamedfahim-testing.hf.space/predict?q=${encodeURIComponent(question)}`;
+
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error("Network response was not ok.");
+        const data = await res.json();
+        document.getElementById("response").innerText = data.response;
+      } catch (error) {
+        document.getElementById("response").innerText = "Error: " + error.message;
+      }
+    }
+  </script>
 </body>
 </html>
